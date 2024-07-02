@@ -1,5 +1,9 @@
 const express = require('express');
 const axios = require('axios');
+const dotenv = require('dotenv');
+
+dotenv.config();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -8,12 +12,20 @@ app.get('/api/hello', async (req, res) => {
     const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
     try {
-        
-        const locationResponse = await axios.get(`http://ip-api.com/json/${clientIp}`);
+        // Fetch location based on IP address
+        const locationResponse = await axios.get(`https://ipinfo.io/${clientIp}/json`);
         const locationData = locationResponse.data;
         const city = locationData.city || 'Unknown';
-        const tempResponse = await axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=YOUR_OPENWEATHERMAP_API_KEY`);
-        const temperature = tempResponse.data.main.temp;
+
+        // Fetch temperature from OpenWeatherMap
+        const weatherResponse = await axios.get(`https://api.openweathermap.org/data/2.5/weather`, {
+            params: {
+                q: city,
+                units: 'metric',
+                appid: process.env.OPENWEATHERMAP_API_KEY
+            }
+        });
+        const temperature = weatherResponse.data.main.temp;
 
         res.json({
             client_ip: clientIp,
@@ -21,6 +33,7 @@ app.get('/api/hello', async (req, res) => {
             greeting: `Hello, ${visitorName}!, the temperature is ${temperature} degrees Celsius in ${city}`
         });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: 'Unable to fetch data' });
     }
 });
