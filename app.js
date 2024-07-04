@@ -1,28 +1,27 @@
 const express = require('express');
 const axios = require('axios');
 const dotenv = require('dotenv');
+const path = require('path');
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-function extractValidIPv4(ipString) {
-    if (!ipString) return null;
-    // Extract the first IP in case of a list
-    let ip = ipString.split(',')[0].trim();
-    // Check if it's a valid IPv4 address
-    const ipv4Pattern = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-    return ipv4Pattern.test(ip) ? ip : null;
-}
+// Serve the static HTML file
+app.use(express.static(path.join(__dirname, 'view')));
 
 app.get('/api/hello', async (req, res) => {
     const visitorName = req.query.visitor_name || 'Visitor';
-    const rawIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    const clientIp = extractValidIPv4(rawIp);
+    let clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
-    if (!clientIp) {
-        return res.status(400).json({ error: 'Invalid IPv4 address' });
+    // Ensure we are using IPv4
+    if (clientIp.includes(',')) {
+        clientIp = clientIp.split(',')[0].trim();
+    }
+
+    if (clientIp.includes(':')) {
+        clientIp = clientIp.split(':').pop();
     }
 
     try {
