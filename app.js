@@ -33,7 +33,7 @@ app.get('/api/hello', async (req, res) => {
             greeting: `Hello, ${visitorName}!, the temperature is ${temperature} degrees Celsius in ${city}`
         });
     } catch (error) {
-        console.error(error);
+        console.error('Error fetching data:', error.message);
         res.status(500).json({ error: 'Unable to fetch data' });
     }
 });
