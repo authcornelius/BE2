@@ -43,7 +43,8 @@ app.get('/api/hello', async (req, res) => {
         res.json({
             client_ip: clientIp,
             location: city,
-            greeting: `Hello, ${visitorName}!, the temperature is ${temperature} degrees Celsius in ${city}`
+            greeting: `Hello, ${visitorName}!, the temperature is ${temperature} degrees Celsius in ${city}`,
+            ip_address: clientIp // Add IP address to the response
         });
     } catch (error) {
         console.error('Error fetching data:', error.message);

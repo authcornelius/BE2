@@ -59,7 +59,7 @@
             try {
                 const response = await fetch(`/api/hello?visitor_name=${visitorName}`);
                 const data = await response.json();
-                document.getElementById('response').innerText = data.greeting || data.error;
+                document.getElementById('response').innerText = `${data.greeting}\nIP Address: ${data.ip_address}`;
             } catch (error) {
                 document.getElementById('response').innerText = 'Error: ' + error.message;
             }
